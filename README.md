@@ -70,6 +70,22 @@ Day 7 additions:
   - `tests/day7-table-ui-coach.test.js`
 - Day 7 note: `docs/day7.md`
 
+Day 8 additions:
+
+- Hand history timeline storage (in-memory, extensible hooks):
+  - `src/review/hand-history-store.js`
+- Review module to inspect decisions after hand:
+  - `src/review/review-module.js`
+  - grade marker mapping: `src/review/grade-marker.js`
+  - EV loss field per decision (heuristic proxy, not solver EV)
+- Gameplay + coach log wiring in table controller:
+  - `getCurrentHandHistory()`
+  - `getReview()`
+  - `renderReview()`
+- Unit/integration tests for Day 8 review flow:
+  - `tests/day8-hand-history-review.test.js`
+- Day 8 note: `docs/day8.md`
+
 ## Run tests
 
 ```bash
