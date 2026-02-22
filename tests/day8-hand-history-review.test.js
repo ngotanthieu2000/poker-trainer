@@ -30,9 +30,9 @@ test('hand history store should save and read timeline events', () => {
 });
 
 test('grade marker mapping should map Good / Mistake / Major Mistake correctly', () => {
-  assert.deepEqual(mapGradeToMarker('Good'), { key: 'good', label: 'Good' });
-  assert.deepEqual(mapGradeToMarker('Mistake'), { key: 'mistake', label: 'Mistake' });
-  assert.deepEqual(mapGradeToMarker('Major Mistake'), { key: 'major-mistake', label: 'Major Mistake' });
+  assert.deepEqual(mapGradeToMarker('Good'), { key: 'good', label: 'Tốt' });
+  assert.deepEqual(mapGradeToMarker('Mistake'), { key: 'mistake', label: 'Lỗi' });
+  assert.deepEqual(mapGradeToMarker('Major Mistake'), { key: 'major-mistake', label: 'Lỗi nặng' });
 });
 
 test('review output should include evLoss field with heuristic metadata', () => {
@@ -80,6 +80,6 @@ test('controller should connect gameplay + coach logs into hand review', () => {
   assert.equal(handHistory.timeline.length, 1);
   assert.equal(handHistory.coachLogs.length, 2);
   assert.equal(review.decisions.length, 1);
-  assert.ok(['Good', 'Mistake', 'Major Mistake'].includes(review.decisions[0].marker.label));
+  assert.ok(['Tốt', 'Lỗi', 'Lỗi nặng'].includes(review.decisions[0].marker.label));
   assert.match(controller.renderReview(), /EV loss:/);
 });

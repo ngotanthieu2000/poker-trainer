@@ -1,4 +1,5 @@
 const { mapGradeToMarker } = require('./grade-marker');
+const { VI_MESSAGES } = require('../i18n/messages-vi');
 
 function round2(value) {
   return Math.round(value * 100) / 100;
@@ -16,9 +17,9 @@ function estimateEvLoss(input = {}) {
   if (grade === 'Good') {
     return {
       value: 0,
-      unit: 'chips',
+      unit: VI_MESSAGES.review.evLossUnit,
       heuristic: true,
-      note: 'Heuristic proxy EV loss: action khớp baseline nên EV loss = 0.',
+      note: VI_MESSAGES.review.noteZeroLoss,
     };
   }
 
@@ -32,9 +33,9 @@ function estimateEvLoss(input = {}) {
 
   return {
     value: evLoss,
-    unit: 'chips',
+    unit: VI_MESSAGES.review.evLossUnit,
     heuristic: true,
-    note: 'Heuristic proxy EV loss dựa trên độ lệch tần suất action so với baseline preflop (chưa phải solver EV thực).',
+    note: VI_MESSAGES.review.noteEstimatedLoss,
   };
 }
 
@@ -74,10 +75,10 @@ function buildHandReview(handHistory = {}) {
 
 function renderReviewText(review = {}) {
   const lines = (review.decisions || []).map((entry) => {
-    return `#${entry.index} ${entry.actor} ${entry.action} | ${entry.marker.label} | EV loss: ${entry.evLoss.value} ${entry.evLoss.unit}`;
+    return `#${entry.index} ${entry.actor} ${entry.action} | ${entry.marker.label} | ${VI_MESSAGES.review.evLossLabel}: ${entry.evLoss.value} ${entry.evLoss.unit}`;
   });
 
-  return [`Review hand ${review.handId || 'n/a'}`, ...lines].join('\n');
+  return [`${VI_MESSAGES.review.titlePrefix} ${review.handId || 'n/a'}`, ...lines].join('\n');
 }
 
 module.exports = {
