@@ -86,6 +86,22 @@ Day 8 additions:
   - `tests/day8-hand-history-review.test.js`
 - Day 8 note: `docs/day8.md`
 
+Day 9 additions:
+
+- Progress tracking metrics module for dashboard:
+  - `src/progress/progress-metrics.js`
+  - Accuracy by position (`UTG/HJ/CO/BTN/SB/BB`)
+  - Accuracy by street (`preflop` implemented, `flop/turn/river` explicit placeholders)
+  - Top 3 frequent mistakes
+  - Recent hands (up to latest 50)
+- Minimal API handler for UI:
+  - `src/api/progress-stats-handler.js`
+- Context update to carry hero position for aggregation:
+  - `src/ui/table-ui.js`
+- Unit tests for metric computation + edge cases:
+  - `tests/day9-progress-dashboard.test.js`
+- Day 9 note: `docs/day9.md`
+
 ## Run tests
 
 ```bash

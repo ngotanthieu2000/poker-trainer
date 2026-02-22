@@ -26,6 +26,7 @@ function createInitialUiState(input = {}) {
       spot: input.spot || 'BB_VS_BTN_OPEN_100BB',
       handKey: input.handKey || 'AJo',
       toCall: input.toCall ?? 10,
+      position: input.position || input.heroPosition || 'BB',
     },
     seats: input.seats || createDefaultSeats(input.heroStack),
     actionControls: ['fold', 'call', 'raise'],
