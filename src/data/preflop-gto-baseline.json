@@ -1,0 +1,16 @@
+{
+  "BTN_OPEN_100BB": {
+    "AA": { "raise": 0.85, "all_in": 0.15 },
+    "AKs": { "raise": 0.8, "call": 0.2 },
+    "AJo": { "raise": 0.42, "call": 0.38, "fold": 0.2 },
+    "76s": { "raise": 0.28, "call": 0.44, "fold": 0.28 },
+    "72o": { "fold": 1 }
+  },
+  "BB_VS_BTN_OPEN_100BB": {
+    "AA": { "raise": 0.75, "call": 0.25 },
+    "AKs": { "raise": 0.35, "call": 0.65 },
+    "AJo": { "call": 0.53, "raise": 0.12, "fold": 0.35 },
+    "76s": { "call": 0.48, "raise": 0.07, "fold": 0.45 },
+    "72o": { "fold": 0.94, "call": 0.06 }
+  }
+}

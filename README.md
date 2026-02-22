@@ -28,6 +28,19 @@ Day 4 additions:
   - `tests/bot-decision-logging.test.js`
 - Day 4 note: `docs/day4.md`
 
+Day 5 additions:
+
+- Data-driven precomputed GTO baseline (preflop):
+  - `src/data/preflop-gto-baseline.json`
+  - Mapping `spot -> hand -> action distribution`
+- Coach-facing recommendation helper/service:
+  - `src/coach/preflop-gto-baseline.js`
+  - `src/coach/preflop-coach-service.js`
+- Safe fallback when data is missing (never crash, always includes reason)
+- Unit tests for baseline data hit, fallback path, and distribution validity:
+  - `tests/preflop-gto-baseline.test.js`
+- Day 5 note: `docs/day5.md`
+
 ## Run tests
 
 ```bash
