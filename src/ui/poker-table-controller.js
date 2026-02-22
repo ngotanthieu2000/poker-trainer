@@ -1,8 +1,19 @@
 const { createInitialUiState, renderTableHtml, LEVELS } = require('./table-ui');
 const { fetchPreActionHint, fetchPostActionGrade } = require('./local-coach-adapter');
+const { createInMemoryHandHistoryStore } = require('../review/hand-history-store');
+const { buildHandReview, renderReviewText } = require('../review/review-module');
 
 function createTableController(input = {}) {
   const state = createInitialUiState(input);
+  const handHistoryStore = input.handHistoryStore || createInMemoryHandHistoryStore();
+  const sessionId = input.sessionId || 'session-local';
+  const handId = input.handId || `hand-${Date.now()}`;
+
+  handHistoryStore.startHand({
+    handId,
+    sessionId,
+    context: state.context,
+  });
 
   function updateSupportLevel(level) {
     if (!LEVELS.includes(level)) {
@@ -14,6 +25,12 @@ function createTableController(input = {}) {
 
   function loadPreActionHint() {
     state.coachPanel.preActionHint = fetchPreActionHint(state.context);
+
+    handHistoryStore.appendCoachLog(handId, {
+      type: 'pre_action_hint',
+      payload: state.coachPanel.preActionHint,
+    });
+
     return state.coachPanel.preActionHint;
   }
 
@@ -36,6 +53,22 @@ function createTableController(input = {}) {
       state.pot += raiseSize;
     }
 
+    handHistoryStore.appendTimelineEvent(handId, {
+      type: 'decision',
+      street: 'preflop',
+      actor: 'hero',
+      action: playerAction,
+      grade: state.coachPanel.postActionGrade.grade,
+      recommendedAction: state.coachPanel.postActionGrade.recommendedAction,
+      distribution: state.coachPanel.postActionGrade.distribution,
+      messageVi: state.coachPanel.postActionGrade.messageVi,
+    });
+
+    handHistoryStore.appendCoachLog(handId, {
+      type: 'post_action_grade',
+      payload: state.coachPanel.postActionGrade,
+    });
+
     return state.coachPanel.postActionGrade;
   }
 
@@ -47,12 +80,27 @@ function createTableController(input = {}) {
     return JSON.parse(JSON.stringify(state));
   }
 
+  function getCurrentHandHistory() {
+    return handHistoryStore.getHand(handId);
+  }
+
+  function getReview() {
+    return buildHandReview(getCurrentHandHistory());
+  }
+
+  function renderReview() {
+    return renderReviewText(getReview());
+  }
+
   return {
     updateSupportLevel,
     loadPreActionHint,
     submitAction,
     render,
     getState,
+    getCurrentHandHistory,
+    getReview,
+    renderReview,
   };
 }
 
