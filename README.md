@@ -55,6 +55,21 @@ Day 6 additions:
   - `tests/realtime-coach-v1.test.js`
 - Day 6 note: `docs/day6.md`
 
+Day 7 additions:
+
+- Table UI v1 (6-max basic view):
+  - `src/ui/table-ui.js`
+  - Seats/positions, pot, stack, minimal actions (`fold/call/raise`)
+- Realtime coach panel UI + level behavior:
+  - `Beginner / Intermediate / Pro`
+  - Different hint visibility/detail by level
+- End-to-end UI controller + local adapter:
+  - `src/ui/poker-table-controller.js`
+  - `src/ui/local-coach-adapter.js`
+- Unit tests for render + level toggle + coach update flow:
+  - `tests/day7-table-ui-coach.test.js`
+- Day 7 note: `docs/day7.md`
+
 ## Run tests
 
 ```bash
