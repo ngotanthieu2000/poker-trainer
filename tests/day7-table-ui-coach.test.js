@@ -9,8 +9,8 @@ test('table ui v1 should render 6-max seats, pot and action controls', () => {
   const html = renderTableHtml(state);
 
   assert.match(html, /Bàn poker 6-max v1/);
-  assert.match(html, /Pot: 15/);
-  assert.match(html, /Cần theo: 10/);
+  assert.match(html, /Pot hiện tại: 15/);
+  assert.match(html, /Số chip cần theo: 10/);
   assert.equal((html.match(/data-seat=/g) || []).length, 6);
   assert.match(html, /data-action="fold"/);
   assert.match(html, /data-action="call"/);
@@ -68,7 +68,7 @@ test('controller should connect pre-action hint and post-action grade end-to-end
   assert.equal(state.toCall, 0);
 
   const html = controller.render();
-  assert.match(html, /Coach thời gian thực/);
+  assert.match(html, /Huấn luyện thời gian thực/);
   assert.match(html, /\[Good\]/);
 });
 
@@ -83,4 +83,19 @@ test('controller should reject duplicate submitAction in a single hand', () => {
 
   controller.submitAction('call');
   assert.throws(() => controller.submitAction('fold'), /Action already submitted/);
+});
+
+test('ui should expose loading/empty/error status labels in render output', () => {
+  const loadingHtml = renderTableHtml(createInitialUiState({ level: 'Beginner', viewStatus: 'loading' }));
+  assert.match(loadingHtml, /Trạng thái ván: loading/);
+  assert.match(loadingHtml, /Đang tải dữ liệu/);
+
+  const emptyHtml = renderTableHtml(createInitialUiState({ level: 'Beginner', viewStatus: 'empty' }));
+  assert.match(emptyHtml, /Chưa có dữ liệu để hiển thị/);
+
+  const state = createInitialUiState({ level: 'Beginner' });
+  state.viewStatus = 'error';
+  state.viewError = 'network';
+  const errorHtml = renderTableHtml(state);
+  assert.match(errorHtml, /Có lỗi xảy ra: network/);
 });

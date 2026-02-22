@@ -62,23 +62,35 @@ function createDecisionReview(decision = {}, handContext = {}) {
 
 function buildHandReview(handHistory = {}) {
   const timeline = handHistory.timeline || [];
-  const decisionTimeline = timeline.filter((event) => event.type === 'decision');
+  const context = handHistory.context || {};
+  const decisions = [];
+
+  for (let i = 0; i < timeline.length; i += 1) {
+    const event = timeline[i];
+    if (event.type !== 'decision') continue;
+    decisions.push(createDecisionReview(event, context));
+  }
 
   return {
     handId: handHistory.handId,
     sessionId: handHistory.sessionId,
-    context: handHistory.context || {},
-    decisions: decisionTimeline.map((decision) => createDecisionReview(decision, handHistory.context || {})),
+    context,
+    decisions,
     coachLogs: handHistory.coachLogs || [],
   };
 }
 
 function renderReviewText(review = {}) {
-  const lines = (review.decisions || []).map((entry) => {
-    return `#${entry.index} ${entry.actor} ${entry.action} | ${entry.marker.label} | ${VI_MESSAGES.review.evLossLabel}: ${entry.evLoss.value} ${entry.evLoss.unit}`;
-  });
+  const decisions = review.decisions || [];
+  const lines = new Array(decisions.length + 1);
+  lines[0] = `${VI_MESSAGES.review.titlePrefix} ${review.handId || 'n/a'}`;
 
-  return [`${VI_MESSAGES.review.titlePrefix} ${review.handId || 'n/a'}`, ...lines].join('\n');
+  for (let i = 0; i < decisions.length; i += 1) {
+    const entry = decisions[i];
+    lines[i + 1] = `#${entry.index} ${entry.actor} ${entry.action} | ${entry.marker.label} | ${VI_MESSAGES.review.evLossLabel}: ${entry.evLoss.value} ${entry.evLoss.unit}`;
+  }
+
+  return lines.join('\n');
 }
 
 module.exports = {

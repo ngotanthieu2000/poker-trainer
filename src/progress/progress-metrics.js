@@ -15,23 +15,6 @@ function getHeroPosition(hand = {}) {
   return hand.context?.position || hand.context?.heroPosition || 'BB';
 }
 
-function getDecisionEvents(hand = {}) {
-  return (hand.timeline || []).filter((event) => event.type === 'decision');
-}
-
-function getCoachLogMessageMap(hand = {}) {
-  const map = new Map();
-  (hand.coachLogs || []).forEach((log) => {
-    if (log.type !== 'post_action_grade') return;
-    const payload = log.payload || {};
-    const key = `${payload.grade || ''}|${payload.recommendedAction || ''}`;
-    if (!map.has(key)) {
-      map.set(key, payload.messageVi || VI_MESSAGES.progress.defaultRecommendationMismatch);
-    }
-  });
-  return map;
-}
-
 function createAccuracyBuckets(keys) {
   return keys.reduce((acc, key) => {
     acc[key] = { correct: 0, total: 0, accuracy: null };
@@ -47,22 +30,51 @@ function finalizeAccuracyBuckets(buckets) {
   return buckets;
 }
 
+function normalizeTimestamp(value) {
+  const ts = Date.parse(value || 0);
+  return Number.isNaN(ts) ? 0 : ts;
+}
+
 function computeProgressStats(hands = []) {
   const handList = Array.isArray(hands) ? hands : [];
 
   const byPosition = createAccuracyBuckets(POSITIONS);
   const byStreet = createAccuracyBuckets(STREETS);
-
   const errorCounter = new Map();
+  const recentHandsRaw = [];
 
-  handList.forEach((hand) => {
+  for (let handIndex = 0; handIndex < handList.length; handIndex += 1) {
+    const hand = handList[handIndex] || {};
     const position = getHeroPosition(hand);
-    const coachMessageMap = getCoachLogMessageMap(hand);
 
-    getDecisionEvents(hand).forEach((decision) => {
+    const coachMessageMap = new Map();
+    const coachLogs = hand.coachLogs || [];
+    for (let i = 0; i < coachLogs.length; i += 1) {
+      const log = coachLogs[i];
+      if (log.type !== 'post_action_grade') continue;
+      const payload = log.payload || {};
+      const key = `${payload.grade || ''}|${payload.recommendedAction || ''}`;
+      if (!coachMessageMap.has(key)) {
+        coachMessageMap.set(key, payload.messageVi || VI_MESSAGES.progress.defaultRecommendationMismatch);
+      }
+    }
+
+    const timeline = hand.timeline || [];
+    let handCorrect = 0;
+    let handTotal = 0;
+
+    for (let i = 0; i < timeline.length; i += 1) {
+      const decision = timeline[i];
+      if (decision.type !== 'decision') continue;
+
+      handTotal += 1;
       const street = (decision.street || 'preflop').toLowerCase();
       const grade = decision.grade || '';
       const isCorrect = isCorrectGrade(grade);
+
+      if (isCorrect) {
+        handCorrect += 1;
+      }
 
       if (byPosition[position]) {
         byPosition[position].total += 1;
@@ -93,8 +105,18 @@ function computeProgressStats(hands = []) {
         item.count += 1;
         errorCounter.set(key, item);
       }
+    }
+
+    recentHandsRaw.push({
+      handId: hand.handId,
+      sessionId: hand.sessionId,
+      startedAt: hand.startedAt,
+      position,
+      decisionCount: handTotal,
+      accuracy: handTotal ? round2((handCorrect / handTotal) * 100) : null,
+      _ts: normalizeTimestamp(hand.startedAt),
     });
-  });
+  }
 
   finalizeAccuracyBuckets(byPosition);
   finalizeAccuracyBuckets(byStreet);
@@ -103,23 +125,10 @@ function computeProgressStats(hands = []) {
     .sort((a, b) => b.count - a.count)
     .slice(0, 3);
 
-  const recentHands = [...handList]
-    .sort((a, b) => new Date(b.startedAt || 0).getTime() - new Date(a.startedAt || 0).getTime())
+  const recentHands = recentHandsRaw
+    .sort((a, b) => b._ts - a._ts)
     .slice(0, 50)
-    .map((hand) => {
-      const decisions = getDecisionEvents(hand);
-      const correct = decisions.filter((item) => isCorrectGrade(item.grade)).length;
-      const total = decisions.length;
-
-      return {
-        handId: hand.handId,
-        sessionId: hand.sessionId,
-        startedAt: hand.startedAt,
-        position: getHeroPosition(hand),
-        decisionCount: total,
-        accuracy: total ? round2((correct / total) * 100) : null,
-      };
-    });
+    .map(({ _ts, ...item }) => item);
 
   return {
     summary: {
