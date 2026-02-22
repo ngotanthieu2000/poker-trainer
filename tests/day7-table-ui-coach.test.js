@@ -65,8 +65,22 @@ test('controller should connect pre-action hint and post-action grade end-to-end
   const hero = state.seats.find((seat) => seat.isHero);
   assert.equal(hero.stack, 90);
   assert.equal(state.pot, 25);
+  assert.equal(state.toCall, 0);
 
   const html = controller.render();
   assert.match(html, /Coach thời gian thực/);
   assert.match(html, /\[Good\]/);
+});
+
+test('controller should reject duplicate submitAction in a single hand', () => {
+  const controller = createTableController({
+    level: 'Beginner',
+    spot: 'BB_VS_BTN_OPEN_100BB',
+    handKey: 'AJo',
+    toCall: 10,
+    heroStack: 100,
+  });
+
+  controller.submitAction('call');
+  assert.throws(() => controller.submitAction('fold'), /Action already submitted/);
 });

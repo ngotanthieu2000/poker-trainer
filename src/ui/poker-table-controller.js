@@ -15,6 +15,8 @@ function createTableController(input = {}) {
     context: state.context,
   });
 
+  let hasSubmittedAction = false;
+
   function updateSupportLevel(level) {
     if (!LEVELS.includes(level)) {
       throw new Error('Invalid support level');
@@ -39,18 +41,26 @@ function createTableController(input = {}) {
       throw new Error('Unsupported player action');
     }
 
+    if (hasSubmittedAction) {
+      throw new Error('Action already submitted for this hand');
+    }
+
     state.coachPanel.postActionGrade = fetchPostActionGrade(playerAction, state.context);
 
     const heroSeat = state.seats.find((seat) => seat.isHero);
     if (heroSeat && playerAction === 'call') {
       heroSeat.stack = Math.max(0, heroSeat.stack - state.toCall);
       state.pot += state.toCall;
+      state.toCall = 0;
+      state.context.toCall = 0;
     }
 
     if (heroSeat && playerAction === 'raise') {
       const raiseSize = state.toCall * 3;
       heroSeat.stack = Math.max(0, heroSeat.stack - raiseSize);
       state.pot += raiseSize;
+      state.toCall = 0;
+      state.context.toCall = 0;
     }
 
     handHistoryStore.appendTimelineEvent(handId, {
@@ -68,6 +78,8 @@ function createTableController(input = {}) {
       type: 'post_action_grade',
       payload: state.coachPanel.postActionGrade,
     });
+
+    hasSubmittedAction = true;
 
     return state.coachPanel.postActionGrade;
   }
