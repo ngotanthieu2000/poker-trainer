@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "test": "node --test"
+    "test": "node --test",
+    "demo:sprint1": "node scripts/demo-sprint1.js"
   }
 }

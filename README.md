@@ -139,8 +139,25 @@ Day 13 additions:
   - `tests/day7-table-ui-coach.test.js`
   - `tests/day9-progress-dashboard.test.js`
 
+Day 14 additions:
+
+- Sprint 1 internal release notes:
+  - `docs/day14-release-notes-sprint1.md`
+- Sprint review technical artifact:
+  - `docs/day14-sprint-review-technical.md`
+- Sprint 2 technical backlog proposal:
+  - `docs/day14-sprint2-technical-backlog.md`
+- Internal demo script:
+  - `scripts/demo-sprint1.js`
+
 ## Run tests
 
 ```bash
 npm test
+```
+
+## Run Sprint 1 internal demo
+
+```bash
+npm run demo:sprint1
 ```
