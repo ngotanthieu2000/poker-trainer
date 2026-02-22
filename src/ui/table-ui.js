@@ -1,3 +1,5 @@
+const { VI_MESSAGES } = require('../i18n/messages-vi');
+
 const LEVELS = ['Beginner', 'Intermediate', 'Pro'];
 
 function createDefaultSeats(heroStack = 1000) {
@@ -48,33 +50,45 @@ function formatDistribution(distribution = {}) {
     .join(' | ');
 }
 
+function getActionLabel(action) {
+  return VI_MESSAGES.ui.actions[action] || action;
+}
+
 function getCoachViewByLevel(level, coachPanel = {}) {
   const preActionHint = coachPanel.preActionHint;
   const postActionGrade = coachPanel.postActionGrade;
 
   if (level === 'Pro') {
     return {
-      preActionText: 'Pro mode: Ẩn gợi ý pre-action để tự quyết định.',
-      postActionText: postActionGrade ? `[${postActionGrade.grade}] ${postActionGrade.messageVi}` : 'Chưa có đánh giá action.',
-      detailText: postActionGrade ? `Recommended: ${postActionGrade.recommendedAction}` : null,
+      preActionText: VI_MESSAGES.ui.coach.proHiddenHint,
+      postActionText: postActionGrade
+        ? `[${postActionGrade.grade}] ${postActionGrade.messageVi}`
+        : VI_MESSAGES.ui.coach.noPostActionGrade,
+      detailText: postActionGrade
+        ? `${VI_MESSAGES.ui.coach.recommendedActionPrefix}: ${getActionLabel(postActionGrade.recommendedAction)}`
+        : null,
     };
   }
 
   if (level === 'Intermediate') {
     return {
       preActionText: preActionHint
-        ? `Hint: ưu tiên ${preActionHint.recommendedAction}`
-        : 'Chưa có hint pre-action.',
-      postActionText: postActionGrade ? `[${postActionGrade.grade}] ${postActionGrade.messageVi}` : 'Chưa có đánh giá action.',
-      detailText: preActionHint ? `Source: ${preActionHint.source}` : null,
+        ? `${VI_MESSAGES.ui.coach.intermediateHintPrefix} ${getActionLabel(preActionHint.recommendedAction)}`
+        : VI_MESSAGES.ui.coach.noPreActionHint,
+      postActionText: postActionGrade
+        ? `[${postActionGrade.grade}] ${postActionGrade.messageVi}`
+        : VI_MESSAGES.ui.coach.noPostActionGrade,
+      detailText: preActionHint ? `${VI_MESSAGES.ui.coach.intermediateSourcePrefix}: ${preActionHint.source}` : null,
     };
   }
 
   return {
-    preActionText: preActionHint ? preActionHint.messageVi : 'Chưa có hint pre-action.',
-    postActionText: postActionGrade ? `[${postActionGrade.grade}] ${postActionGrade.messageVi}` : 'Chưa có đánh giá action.',
+    preActionText: preActionHint ? preActionHint.messageVi : VI_MESSAGES.ui.coach.noPreActionHint,
+    postActionText: postActionGrade
+      ? `[${postActionGrade.grade}] ${postActionGrade.messageVi}`
+      : VI_MESSAGES.ui.coach.noPostActionGrade,
     detailText: preActionHint
-      ? `Range: ${formatDistribution(preActionHint.distribution)}`
+      ? `${VI_MESSAGES.ui.coach.beginnerRangePrefix}: ${formatDistribution(preActionHint.distribution)}`
       : null,
   };
 }
@@ -90,20 +104,20 @@ function renderTableHtml(state) {
     .join('');
 
   const actionControls = state.actionControls
-    .map((action) => `<button data-action="${action}">${action.toUpperCase()}</button>`)
+    .map((action) => `<button data-action="${action}">${getActionLabel(action)}</button>`)
     .join('');
 
   const coachView = getCoachViewByLevel(state.level, state.coachPanel);
 
   return [
     `<section id="table-v1" data-level="${state.level}">`,
-    `<h2>6-Max Table v1</h2>`,
-    `<div class="pot">Pot: ${state.pot}</div>`,
-    `<div class="to-call">To call: ${state.toCall}</div>`,
+    `<h2>${VI_MESSAGES.ui.tableTitle}</h2>`,
+    `<div class="pot">${VI_MESSAGES.ui.potLabel}: ${state.pot}</div>`,
+    `<div class="to-call">${VI_MESSAGES.ui.toCallLabel}: ${state.toCall}</div>`,
     `<ul class="seats">${seatsHtml}</ul>`,
     `<div class="action-controls">${actionControls}</div>`,
     `<aside class="coach-panel">`,
-    `<h3>Coach realtime</h3>`,
+    `<h3>${VI_MESSAGES.ui.coachPanelTitle}</h3>`,
     `<p class="pre-action">${coachView.preActionText}</p>`,
     `<p class="post-action">${coachView.postActionText}</p>`,
     coachView.detailText ? `<p class="coach-detail">${coachView.detailText}</p>` : '',
@@ -117,5 +131,6 @@ module.exports = {
   createDefaultSeats,
   createInitialUiState,
   getCoachViewByLevel,
+  getActionLabel,
   renderTableHtml,
 };

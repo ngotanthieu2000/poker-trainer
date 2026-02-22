@@ -102,6 +102,21 @@ Day 9 additions:
   - `tests/day9-progress-dashboard.test.js`
 - Day 9 note: `docs/day9.md`
 
+Day 10 additions:
+
+- Vietnamese localization consistency for table/coach/review/progress:
+  - `src/i18n/messages-vi.js`
+  - `src/ui/table-ui.js`
+  - `src/review/review-module.js`
+  - `src/review/grade-marker.js`
+  - `src/progress/progress-metrics.js`
+- Poker glossary (Vietnamese):
+  - `docs/glossary-vi.md`
+- Day 10 note:
+  - `docs/day10.md`
+- Consistency tests for key labels/text:
+  - `tests/day10-vi-localization-consistency.test.js`
+
 ## Run tests
 
 ```bash

@@ -8,13 +8,16 @@ test('table ui v1 should render 6-max seats, pot and action controls', () => {
   const state = createInitialUiState({ level: 'Beginner' });
   const html = renderTableHtml(state);
 
-  assert.match(html, /6-Max Table v1/);
+  assert.match(html, /Bàn poker 6-max v1/);
   assert.match(html, /Pot: 15/);
-  assert.match(html, /To call: 10/);
+  assert.match(html, /Cần theo: 10/);
   assert.equal((html.match(/data-seat=/g) || []).length, 6);
   assert.match(html, /data-action="fold"/);
   assert.match(html, /data-action="call"/);
   assert.match(html, /data-action="raise"/);
+  assert.match(html, />Bỏ bài</);
+  assert.match(html, />Theo</);
+  assert.match(html, />Tố</);
 });
 
 test('support level toggle should change coach visibility behavior', () => {
@@ -33,12 +36,12 @@ test('support level toggle should change coach visibility behavior', () => {
   const pro = getCoachViewByLevel('Pro', coachPanel);
 
   assert.match(beginner.preActionText, /Nên call/);
-  assert.match(beginner.detailText, /Range:/);
+  assert.match(beginner.detailText, /Dải tần suất:/);
 
-  assert.match(intermediate.preActionText, /ưu tiên call/);
-  assert.match(intermediate.detailText, /Source:/);
+  assert.match(intermediate.preActionText, /ưu tiên Theo/);
+  assert.match(intermediate.detailText, /Nguồn:/);
 
-  assert.match(pro.preActionText, /Ẩn gợi ý pre-action/);
+  assert.match(pro.preActionText, /Ẩn gợi ý trước hành động/);
 });
 
 test('controller should connect pre-action hint and post-action grade end-to-end', () => {
@@ -64,6 +67,6 @@ test('controller should connect pre-action hint and post-action grade end-to-end
   assert.equal(state.pot, 25);
 
   const html = controller.render();
-  assert.match(html, /Coach realtime/);
+  assert.match(html, /Coach thời gian thực/);
   assert.match(html, /\[Good\]/);
 });

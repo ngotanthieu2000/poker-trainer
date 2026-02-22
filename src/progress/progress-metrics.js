@@ -1,3 +1,5 @@
+const { VI_MESSAGES } = require('../i18n/messages-vi');
+
 const POSITIONS = ['UTG', 'HJ', 'CO', 'BTN', 'SB', 'BB'];
 const STREETS = ['preflop', 'flop', 'turn', 'river'];
 
@@ -24,7 +26,7 @@ function getCoachLogMessageMap(hand = {}) {
     const payload = log.payload || {};
     const key = `${payload.grade || ''}|${payload.recommendedAction || ''}`;
     if (!map.has(key)) {
-      map.set(key, payload.messageVi || 'Không theo action khuyến nghị');
+      map.set(key, payload.messageVi || VI_MESSAGES.progress.defaultRecommendationMismatch);
     }
   });
   return map;
@@ -86,7 +88,7 @@ function computeProgressStats(hands = []) {
           messageVi:
             coachMessageMap.get(`${grade}|${recommendedAction}`) ||
             decision.messageVi ||
-            'Không theo action khuyến nghị',
+            VI_MESSAGES.progress.defaultRecommendationMismatch,
         };
         item.count += 1;
         errorCounter.set(key, item);
@@ -133,15 +135,15 @@ function computeProgressStats(hands = []) {
       },
       flop: {
         ...byStreet.flop,
-        status: 'placeholder_until_postflop_review_data',
+        status: VI_MESSAGES.progress.accuracyPlaceholderStatus,
       },
       turn: {
         ...byStreet.turn,
-        status: 'placeholder_until_postflop_review_data',
+        status: VI_MESSAGES.progress.accuracyPlaceholderStatus,
       },
       river: {
         ...byStreet.river,
-        status: 'placeholder_until_postflop_review_data',
+        status: VI_MESSAGES.progress.accuracyPlaceholderStatus,
       },
     },
     topErrors,

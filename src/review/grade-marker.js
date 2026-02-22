@@ -1,7 +1,7 @@
 const REVIEW_MARKERS = {
-  Good: { key: 'good', label: 'Good' },
-  Mistake: { key: 'mistake', label: 'Mistake' },
-  'Major Mistake': { key: 'major-mistake', label: 'Major Mistake' },
+  Good: { key: 'good', label: 'Tốt' },
+  Mistake: { key: 'mistake', label: 'Lỗi' },
+  'Major Mistake': { key: 'major-mistake', label: 'Lỗi nặng' },
 };
 
 function mapGradeToMarker(grade) {
