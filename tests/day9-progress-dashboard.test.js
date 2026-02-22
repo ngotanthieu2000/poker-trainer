@@ -112,6 +112,13 @@ test('progress stats handler should expose API-compatible response', () => {
   };
 
   const result = handleProgressStatsRequest(payload);
+  assert.equal(result.status, 'ready');
   assert.equal(result.summary.totalHands, 1);
   assert.equal(result.accuracyByPosition.SB.accuracy, 100);
+});
+
+test('progress stats handler should return empty status for no hands', () => {
+  const result = handleProgressStatsRequest({ hands: [] });
+  assert.equal(result.status, 'empty');
+  assert.equal(result.summary.totalHands, 0);
 });

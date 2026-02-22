@@ -32,6 +32,8 @@ function createInitialUiState(input = {}) {
     },
     seats: input.seats || createDefaultSeats(input.heroStack),
     actionControls: ['fold', 'call', 'raise'],
+    viewStatus: input.viewStatus || 'ready',
+    viewError: null,
     coachPanel: {
       preActionHint: null,
       postActionGrade: null,
@@ -93,29 +95,73 @@ function getCoachViewByLevel(level, coachPanel = {}) {
   };
 }
 
-function renderTableHtml(state) {
-  const seatsHtml = state.seats
-    .map((seat) => {
-      const tags = [seat.position, `stack:${seat.stack}`];
-      if (seat.isHero) tags.push('HERO');
-      if (seat.isActive) tags.push('ACT');
-      return `<li data-seat="${seat.seat}">${seat.name} (${tags.join(' | ')})</li>`;
-    })
-    .join('');
+function renderStatusBanner(state) {
+  if (state.viewStatus === 'loading') {
+    return `<div class="view-status is-loading">${VI_MESSAGES.ui.loadingLabel}</div>`;
+  }
 
-  const actionControls = state.actionControls
+  if (state.viewStatus === 'empty') {
+    return `<div class="view-status is-empty">${VI_MESSAGES.ui.emptyLabel}</div>`;
+  }
+
+  if (state.viewStatus === 'error') {
+    const detail = state.viewError || 'unknown';
+    return `<div class="view-status is-error">${VI_MESSAGES.ui.errorPrefix}: ${detail}</div>`;
+  }
+
+  return '';
+}
+
+function createRenderCache() {
+  const actionControlHtml = ['fold', 'call', 'raise']
     .map((action) => `<button data-action="${action}">${getActionLabel(action)}</button>`)
     .join('');
 
+  let seatsKey = '';
+  let seatsHtml = '';
+
+  function getSeatsHtml(seats = []) {
+    const nextKey = seats
+      .map((seat) => `${seat.seat}:${seat.stack}:${seat.isHero ? 1 : 0}:${seat.isActive ? 1 : 0}`)
+      .join(';');
+
+    if (nextKey === seatsKey) {
+      return seatsHtml;
+    }
+
+    seatsKey = nextKey;
+    seatsHtml = seats
+      .map((seat) => {
+        const tags = [seat.position, `stack:${seat.stack}`];
+        if (seat.isHero) tags.push('HERO');
+        if (seat.isActive) tags.push('ACT');
+        return `<li data-seat="${seat.seat}">${seat.name} (${tags.join(' | ')})</li>`;
+      })
+      .join('');
+
+    return seatsHtml;
+  }
+
+  return {
+    actionControlHtml,
+    getSeatsHtml,
+  };
+}
+
+function renderTableHtml(state, renderCache = null) {
+  const cache = renderCache || createRenderCache();
   const coachView = getCoachViewByLevel(state.level, state.coachPanel);
 
   return [
     `<section id="table-v1" data-level="${state.level}">`,
     `<h2>${VI_MESSAGES.ui.tableTitle}</h2>`,
+    `<div class="support-level">${VI_MESSAGES.ui.supportLevelLabel}: ${VI_MESSAGES.ui.supportLevels[state.level] || state.level}</div>`,
+    `<div class="hand-status">${VI_MESSAGES.ui.handStatusLabel}: ${state.viewStatus}</div>`,
+    renderStatusBanner(state),
     `<div class="pot">${VI_MESSAGES.ui.potLabel}: ${state.pot}</div>`,
     `<div class="to-call">${VI_MESSAGES.ui.toCallLabel}: ${state.toCall}</div>`,
-    `<ul class="seats">${seatsHtml}</ul>`,
-    `<div class="action-controls">${actionControls}</div>`,
+    `<ul class="seats">${cache.getSeatsHtml(state.seats)}</ul>`,
+    `<div class="action-controls">${cache.actionControlHtml}</div>`,
     `<aside class="coach-panel">`,
     `<h3>${VI_MESSAGES.ui.coachPanelTitle}</h3>`,
     `<p class="pre-action">${coachView.preActionText}</p>`,
@@ -132,5 +178,6 @@ module.exports = {
   createInitialUiState,
   getCoachViewByLevel,
   getActionLabel,
+  createRenderCache,
   renderTableHtml,
 };

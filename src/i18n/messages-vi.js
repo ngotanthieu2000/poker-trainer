@@ -1,9 +1,14 @@
 const VI_MESSAGES = {
   ui: {
     tableTitle: 'Bàn poker 6-max v1',
-    potLabel: 'Pot',
-    toCallLabel: 'Cần theo',
-    coachPanelTitle: 'Coach thời gian thực',
+    potLabel: 'Pot hiện tại',
+    toCallLabel: 'Số chip cần theo',
+    coachPanelTitle: 'Huấn luyện thời gian thực',
+    supportLevelLabel: 'Mức hỗ trợ',
+    handStatusLabel: 'Trạng thái ván',
+    loadingLabel: 'Đang tải dữ liệu...',
+    emptyLabel: 'Chưa có dữ liệu để hiển thị.',
+    errorPrefix: 'Có lỗi xảy ra',
     supportLevels: {
       Beginner: 'Cơ bản',
       Intermediate: 'Trung cấp',

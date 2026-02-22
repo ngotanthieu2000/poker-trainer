@@ -117,6 +117,28 @@ Day 10 additions:
 - Consistency tests for key labels/text:
   - `tests/day10-vi-localization-consistency.test.js`
 
+Day 13 additions:
+
+- Performance polish for progress dashboard aggregation:
+  - `src/progress/progress-metrics.js`
+  - optimized loop/allocation path for large hand sets
+- API response status contract for progress endpoint:
+  - `src/api/progress-stats-handler.js`
+  - status: `ready | empty | error`
+- Table UI render/perception improvements:
+  - `src/ui/table-ui.js`
+  - `src/ui/poker-table-controller.js`
+  - `src/i18n/messages-vi.js`
+  - added `loading/empty/error` status banner + render cache
+- Review pipeline micro-optimization:
+  - `src/review/review-module.js`
+- Benchmark script + report:
+  - `benchmarks/day13-perf-benchmark.js`
+  - `docs/day13.md`
+- Regression updates:
+  - `tests/day7-table-ui-coach.test.js`
+  - `tests/day9-progress-dashboard.test.js`
+
 ## Run tests
 
 ```bash

@@ -1,13 +1,21 @@
-const { createInitialUiState, renderTableHtml, LEVELS } = require('./table-ui');
+const { createInitialUiState, renderTableHtml, LEVELS, createRenderCache } = require('./table-ui');
 const { fetchPreActionHint, fetchPostActionGrade } = require('./local-coach-adapter');
 const { createInMemoryHandHistoryStore } = require('../review/hand-history-store');
 const { buildHandReview, renderReviewText } = require('../review/review-module');
+
+function cloneState(state) {
+  if (typeof structuredClone === 'function') {
+    return structuredClone(state);
+  }
+  return JSON.parse(JSON.stringify(state));
+}
 
 function createTableController(input = {}) {
   const state = createInitialUiState(input);
   const handHistoryStore = input.handHistoryStore || createInMemoryHandHistoryStore();
   const sessionId = input.sessionId || 'session-local';
   const handId = input.handId || `hand-${Date.now()}`;
+  const renderCache = createRenderCache();
 
   handHistoryStore.startHand({
     handId,
@@ -26,14 +34,25 @@ function createTableController(input = {}) {
   }
 
   function loadPreActionHint() {
-    state.coachPanel.preActionHint = fetchPreActionHint(state.context);
+    state.viewStatus = 'loading';
+    state.viewError = null;
 
-    handHistoryStore.appendCoachLog(handId, {
-      type: 'pre_action_hint',
-      payload: state.coachPanel.preActionHint,
-    });
+    try {
+      const hint = fetchPreActionHint(state.context);
+      state.coachPanel.preActionHint = hint;
+      state.viewStatus = hint ? 'ready' : 'empty';
 
-    return state.coachPanel.preActionHint;
+      handHistoryStore.appendCoachLog(handId, {
+        type: 'pre_action_hint',
+        payload: hint,
+      });
+
+      return hint;
+    } catch (error) {
+      state.viewStatus = 'error';
+      state.viewError = error.message;
+      throw error;
+    }
   }
 
   function submitAction(playerAction) {
@@ -45,51 +64,61 @@ function createTableController(input = {}) {
       throw new Error('Action already submitted for this hand');
     }
 
-    state.coachPanel.postActionGrade = fetchPostActionGrade(playerAction, state.context);
+    state.viewStatus = 'loading';
+    state.viewError = null;
 
-    const heroSeat = state.seats.find((seat) => seat.isHero);
-    if (heroSeat && playerAction === 'call') {
-      heroSeat.stack = Math.max(0, heroSeat.stack - state.toCall);
-      state.pot += state.toCall;
-      state.toCall = 0;
-      state.context.toCall = 0;
+    try {
+      state.coachPanel.postActionGrade = fetchPostActionGrade(playerAction, state.context);
+
+      const heroSeat = state.seats.find((seat) => seat.isHero);
+      if (heroSeat && playerAction === 'call') {
+        heroSeat.stack = Math.max(0, heroSeat.stack - state.toCall);
+        state.pot += state.toCall;
+        state.toCall = 0;
+        state.context.toCall = 0;
+      }
+
+      if (heroSeat && playerAction === 'raise') {
+        const raiseSize = state.toCall * 3;
+        heroSeat.stack = Math.max(0, heroSeat.stack - raiseSize);
+        state.pot += raiseSize;
+        state.toCall = 0;
+        state.context.toCall = 0;
+      }
+
+      handHistoryStore.appendTimelineEvent(handId, {
+        type: 'decision',
+        street: 'preflop',
+        actor: 'hero',
+        action: playerAction,
+        grade: state.coachPanel.postActionGrade.grade,
+        recommendedAction: state.coachPanel.postActionGrade.recommendedAction,
+        distribution: state.coachPanel.postActionGrade.distribution,
+        messageVi: state.coachPanel.postActionGrade.messageVi,
+      });
+
+      handHistoryStore.appendCoachLog(handId, {
+        type: 'post_action_grade',
+        payload: state.coachPanel.postActionGrade,
+      });
+
+      hasSubmittedAction = true;
+      state.viewStatus = 'ready';
+
+      return state.coachPanel.postActionGrade;
+    } catch (error) {
+      state.viewStatus = 'error';
+      state.viewError = error.message;
+      throw error;
     }
-
-    if (heroSeat && playerAction === 'raise') {
-      const raiseSize = state.toCall * 3;
-      heroSeat.stack = Math.max(0, heroSeat.stack - raiseSize);
-      state.pot += raiseSize;
-      state.toCall = 0;
-      state.context.toCall = 0;
-    }
-
-    handHistoryStore.appendTimelineEvent(handId, {
-      type: 'decision',
-      street: 'preflop',
-      actor: 'hero',
-      action: playerAction,
-      grade: state.coachPanel.postActionGrade.grade,
-      recommendedAction: state.coachPanel.postActionGrade.recommendedAction,
-      distribution: state.coachPanel.postActionGrade.distribution,
-      messageVi: state.coachPanel.postActionGrade.messageVi,
-    });
-
-    handHistoryStore.appendCoachLog(handId, {
-      type: 'post_action_grade',
-      payload: state.coachPanel.postActionGrade,
-    });
-
-    hasSubmittedAction = true;
-
-    return state.coachPanel.postActionGrade;
   }
 
   function render() {
-    return renderTableHtml(state);
+    return renderTableHtml(state, renderCache);
   }
 
   function getState() {
-    return JSON.parse(JSON.stringify(state));
+    return cloneState(state);
   }
 
   function getCurrentHandHistory() {
