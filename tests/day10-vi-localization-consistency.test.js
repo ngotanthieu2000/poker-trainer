@@ -25,10 +25,10 @@ test('table + coach should use centralized Vietnamese labels', () => {
 test('review/progress should reuse Vietnamese fallback terms consistently', () => {
   const reviewText = renderReviewText({
     handId: 'h-day10',
-    decisions: [{ index: 0, actor: 'hero', action: 'call', marker: { label: 'Tốt' }, evLoss: { value: 0, unit: 'chips' } }],
+    decisions: [{ index: 0, actor: 'hero', action: 'call', marker: { label: 'Tốt' }, evLoss: { value: 0, unit: 'chip' } }],
   });
-  assert.match(reviewText, /Review hand h-day10/);
-  assert.match(reviewText, /EV loss: 0 chips/);
+  assert.match(reviewText, /Xem lại ván h-day10/);
+  assert.match(reviewText, /Mất EV: 0 chip/);
 
   const stats = computeProgressStats([
     {

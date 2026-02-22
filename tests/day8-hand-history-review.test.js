@@ -81,5 +81,5 @@ test('controller should connect gameplay + coach logs into hand review', () => {
   assert.equal(handHistory.coachLogs.length, 2);
   assert.equal(review.decisions.length, 1);
   assert.ok(['Tốt', 'Lỗi', 'Lỗi nặng'].includes(review.decisions[0].marker.label));
-  assert.match(controller.renderReview(), /EV loss:/);
+  assert.match(controller.renderReview(), /Mất EV:/);
 });
