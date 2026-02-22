@@ -25,3 +25,4 @@
 - Logic game/coach không đổi, chỉ refactor text/label.
 - `data-action="fold/call/raise"` giữ nguyên để không phá API/controller hiện có.
 - Placeholder status ở progress được giữ nguyên contract value `placeholder_until_postflop_review_data`.
+- Day 12 cập nhật bổ sung Việt hóa review labels: `Xem lại ván`, `Mất EV`, `chip`.

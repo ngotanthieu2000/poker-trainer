@@ -25,12 +25,12 @@ const VI_MESSAGES = {
     },
   },
   review: {
-    titlePrefix: 'Review hand',
-    evLossLabel: 'EV loss',
-    evLossUnit: 'chips',
-    noteZeroLoss: 'Heuristic proxy EV loss: action khớp baseline nên EV loss = 0.',
+    titlePrefix: 'Xem lại ván',
+    evLossLabel: 'Mất EV',
+    evLossUnit: 'chip',
+    noteZeroLoss: 'Mất EV dạng heuristic proxy: action khớp baseline nên mất EV = 0.',
     noteEstimatedLoss:
-      'Heuristic proxy EV loss dựa trên độ lệch tần suất action so với baseline preflop (chưa phải solver EV thực).',
+      'Mất EV dạng heuristic proxy dựa trên độ lệch tần suất action so với baseline preflop (chưa phải EV solver thực).',
   },
   progress: {
     defaultRecommendationMismatch: 'Không theo hành động khuyến nghị',
