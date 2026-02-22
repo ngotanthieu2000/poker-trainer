@@ -1,0 +1,311 @@
+openapi: 3.1.0
+info:
+  title: Poker Trainer API Contracts
+  version: 0.2.0-day2
+  description: >-
+    Day 2 baseline contracts for gameplay, coach, review, and progress domains.
+servers:
+  - url: https://api.poker-trainer.local/v1
+paths:
+  /gameplay/sessions:
+    post:
+      summary: Start a gameplay session
+      operationId: createGameplaySession
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateGameplaySessionRequest'
+      responses:
+        '201':
+          description: Session created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameplaySession'
+  /gameplay/sessions/{sessionId}/actions:
+    post:
+      summary: Submit player action in the active hand
+      operationId: submitGameplayAction
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmitActionRequest'
+      responses:
+        '200':
+          description: Action accepted and hand state updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HandState'
+  /coach/recommendations:
+    post:
+      summary: Get coaching recommendation for a spot
+      operationId: getCoachRecommendation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CoachRecommendationRequest'
+      responses:
+        '200':
+          description: Recommendation generated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CoachRecommendation'
+  /review/hands:
+    get:
+      summary: List reviewed hands for a user
+      operationId: listReviewedHands
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: Paginated reviewed hands
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewedHandsPage'
+  /review/hands/{handId}:
+    get:
+      summary: Get detail for a reviewed hand
+      operationId: getReviewedHand
+      parameters:
+        - $ref: '#/components/parameters/HandId'
+      responses:
+        '200':
+          description: Hand review detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HandReview'
+  /progress/summary:
+    get:
+      summary: Get progress summary for a user
+      operationId: getProgressSummary
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+        - name: range
+          in: query
+          schema:
+            type: string
+            enum: [7d, 30d, 90d]
+            default: 30d
+      responses:
+        '200':
+          description: Progress summary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProgressSummary'
+components:
+  parameters:
+    SessionId:
+      name: sessionId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    HandId:
+      name: handId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    UserId:
+      name: userId
+      in: query
+      required: true
+      schema:
+        type: string
+        format: uuid
+  schemas:
+    CreateGameplaySessionRequest:
+      type: object
+      required: [userId, gameType, stakes]
+      properties:
+        userId:
+          type: string
+          format: uuid
+        gameType:
+          type: string
+          enum: [cash_6max, cash_hu, mtt]
+        stakes:
+          type: string
+          example: 50nl
+        tableSize:
+          type: integer
+          minimum: 2
+          maximum: 9
+          default: 6
+    GameplaySession:
+      type: object
+      required: [sessionId, userId, gameType, stakes, status, startedAt]
+      properties:
+        sessionId:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        gameType:
+          type: string
+        stakes:
+          type: string
+        status:
+          type: string
+          enum: [active, paused, completed]
+        startedAt:
+          type: string
+          format: date-time
+    SubmitActionRequest:
+      type: object
+      required: [handId, actorPosition, action, amount]
+      properties:
+        handId:
+          type: string
+          format: uuid
+        actorPosition:
+          type: string
+          enum: [utg, hj, co, btn, sb, bb]
+        action:
+          type: string
+          enum: [fold, check, call, bet, raise, all_in]
+        amount:
+          type: integer
+          minimum: 0
+    HandState:
+      type: object
+      required: [handId, street, potSize, nextToAct]
+      properties:
+        handId:
+          type: string
+          format: uuid
+        street:
+          type: string
+          enum: [preflop, flop, turn, river, showdown]
+        boardCards:
+          type: array
+          items:
+            type: string
+            pattern: '^[2-9TJQKA][cdhs]$'
+        potSize:
+          type: integer
+          minimum: 0
+        nextToAct:
+          type: string
+    CoachRecommendationRequest:
+      type: object
+      required: [userId, handId, decisionPoint]
+      properties:
+        userId:
+          type: string
+          format: uuid
+        handId:
+          type: string
+          format: uuid
+        decisionPoint:
+          type: string
+        contextTags:
+          type: array
+          items:
+            type: string
+    CoachRecommendation:
+      type: object
+      required: [recommendationId, handId, action, confidence]
+      properties:
+        recommendationId:
+          type: string
+          format: uuid
+        handId:
+          type: string
+          format: uuid
+        action:
+          type: string
+          enum: [fold, call, raise]
+        sizeSuggestion:
+          type: number
+          minimum: 0
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+        rationale:
+          type: array
+          items:
+            type: string
+    ReviewedHandsPage:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/HandReview'
+        nextCursor:
+          type: string
+          nullable: true
+    HandReview:
+      type: object
+      required: [handId, userId, score, mistakes, reviewedAt]
+      properties:
+        handId:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        score:
+          type: integer
+          minimum: 0
+          maximum: 100
+        mistakes:
+          type: array
+          items:
+            type: string
+        reviewedAt:
+          type: string
+          format: date-time
+    ProgressSummary:
+      type: object
+      required: [userId, range, sessionsPlayed, handsReviewed, averageScore]
+      properties:
+        userId:
+          type: string
+          format: uuid
+        range:
+          type: string
+        sessionsPlayed:
+          type: integer
+          minimum: 0
+        handsReviewed:
+          type: integer
+          minimum: 0
+        averageScore:
+          type: number
+          minimum: 0
+          maximum: 100
+        leakTags:
+          type: array
+          items:
+            type: string
