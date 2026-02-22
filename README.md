@@ -41,6 +41,20 @@ Day 5 additions:
   - `tests/preflop-gto-baseline.test.js`
 - Day 5 note: `docs/day5.md`
 
+Day 6 additions:
+
+- Realtime coach v1:
+  - `src/coach/realtime-coach-service.js`
+  - Pre-action hint + post-action grading (`Good / Mistake / Major Mistake`)
+  - Vietnamese short explanations for hints/grades
+- Integration with Day 5 coach recommendation service:
+  - uses `getCoachPreflopRecommendation` for baseline/fallback
+- Minimal handler entry point:
+  - `src/api/realtime-coach-handler.js`
+- Unit tests:
+  - `tests/realtime-coach-v1.test.js`
+- Day 6 note: `docs/day6.md`
+
 ## Run tests
 
 ```bash
