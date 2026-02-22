@@ -161,3 +161,22 @@ npm test
 ```bash
 npm run demo:sprint1
 ```
+
+## FE Refactor Day 1 (Next.js foundation)
+
+- FE app path: `apps/web`
+- Day 1 docs: `docs/day1-fe-refactor.md`
+
+Run FE local:
+
+```bash
+npm run fe:install
+npm run fe:dev
+```
+
+Build/lint FE:
+
+```bash
+npm run fe:build
+npm run fe:lint
+```
