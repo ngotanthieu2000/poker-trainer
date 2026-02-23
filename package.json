@@ -4,6 +4,10 @@
   "private": true,
   "scripts": {
     "test": "node --test",
-    "demo:sprint1": "node scripts/demo-sprint1.js"
+    "demo:sprint1": "node scripts/demo-sprint1.js",
+    "fe:install": "npm --prefix apps/web install",
+    "fe:dev": "npm --prefix apps/web run dev",
+    "fe:build": "npm --prefix apps/web run build",
+    "fe:lint": "npm --prefix apps/web run lint"
   }
 }

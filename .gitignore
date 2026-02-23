@@ -1,0 +1,6 @@
+node_modules/
+.next/
+coverage/
+.env*
+apps/*/node_modules/
+apps/*/.next/
